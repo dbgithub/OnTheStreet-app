@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="sortingpreferences">
+        <item>Places around you (nearest)</item>
+        <item>Nah&#8230;, does not matter. Show all.</item>
+    </string-array>
+</resources>

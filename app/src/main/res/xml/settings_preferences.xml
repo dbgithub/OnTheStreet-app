@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Location" android:icon="@drawable/ic_location_black_24dp">
+        <EditTextPreference android:key="locationDistance" android:defaultValue="50"  android:title="Nearest place distance radius" android:summary="When sorting out the list of places, this is the distance in kilometres that will be covered" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:title="Nearest place notification (every minute)"
+            android:key="NearestPlaceNotification"
+            android:switchTextOn="Yes"
+            android:switchTextOff="No"
+            android:summaryOn="Notifications will be sent"
+            android:summaryOff="Notifications off" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Customization">
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Locale">
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
