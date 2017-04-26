@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 /**
  * Created by aitor on 4/22/17.
@@ -25,6 +26,12 @@ public class MySettingsFragment extends PreferenceFragment implements SharedPref
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-
+//        if (key.equals("Theme")) {
+        Log.i("MYLOG", "(Theme) Has seleccionado: " + sharedPreferences.getString(key,""));
+//        if (sharedPreferences.getString(key,"").equals("AppTheme2")) {
+//            theme_color = "AppTheme2";
+//        } else {
+//            theme_color = "AppTheme";
+//        }
     }
 }

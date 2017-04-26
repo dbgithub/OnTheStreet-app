@@ -10,15 +10,26 @@
             android:switchTextOff="No"
             android:summaryOn="Notifications will be sent"
             android:summaryOff="Notifications off" />
-
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Customization">
-
+        <ListPreference
+            android:entries="@array/settingsPageTheme_keys"
+            android:entryValues="@array/settingsPageTheme_values"
+            android:summary="Select the theme you prefer for the app"
+            android:title="Theme"
+            android:key="Theme"/>
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="Locale">
-
+    <PreferenceCategory android:title="Images">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:title="Set random images when saving place"
+            android:key="RandomImagePlace"
+            android:switchTextOn="Yes"
+            android:switchTextOff="No"
+            android:summaryOn="Random images will be selected"
+            android:summaryOff="Blank image" />
     </PreferenceCategory>
 
 </PreferenceScreen>

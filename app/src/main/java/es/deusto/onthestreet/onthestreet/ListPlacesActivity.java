@@ -47,7 +47,7 @@ import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
 
-public class ListPlacesActivity extends AppCompatActivity implements DialogInterface.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class ListPlacesActivity extends AppCompatActivity implements DialogInterface.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     // Declaring a ArrayList of Place entity:
     public ArrayList<Place> arraylPlaces = new ArrayList<>();
@@ -71,6 +71,7 @@ public class ListPlacesActivity extends AppCompatActivity implements DialogInter
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         PreferenceManager.setDefaultValues(this, R.xml.settings_preferences, false); // Loads DEFAULT values for any item in Settings/Preferences page.
+        PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext()).registerOnSharedPreferenceChangeListener(this); // Binds a callback listener for changes in preferences/settings page:
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -395,12 +396,12 @@ public class ListPlacesActivity extends AppCompatActivity implements DialogInter
         // Persistent way of loading data:
         arraylPlaces = new PersistanceManager(getApplicationContext()).loadPlaces();
         arraylPlaces_backup = new PersistanceManager(getApplicationContext()).loadPlaces();
-        if (arraylPlaces == null) {
+        if (arraylPlaces.isEmpty()) {
             arraylPlaces = new ArrayList<>(); // if empty, then initialize to empty ArrayList
         } else { // If not empty, then, we should start the NearestPlace service to watch the nearest place:
             startNearestPlaceService();
         }
-        if (arraylPlaces_backup == null) {arraylPlaces_backup = new ArrayList<>();} // if empty, then initialize to empty ArrayList
+        if (arraylPlaces_backup.isEmpty()) {arraylPlaces_backup = new ArrayList<>();} // if empty, then initialize to empty ArrayList
     }
 
     /**
@@ -487,6 +488,8 @@ public class ListPlacesActivity extends AppCompatActivity implements DialogInter
         super.onStart();
         // Start the connection to Google Play Services (a callback with the status of the connection will be received)
         connectToGooglePlayServices();
+        // If the NearestPlaceNotification service was not initialized and now is ON, then it is necessary to trigger it.
+        startNearestPlaceService();
     }
 
     /**
@@ -496,7 +499,6 @@ public class ListPlacesActivity extends AppCompatActivity implements DialogInter
     @Override
     protected void onStop(){
         super.onStop();
-        Log.i("LOG MESSAGE", "onStop() called!! Saving data to internal storage! :)");
         // Clear search results (if any). Going back to initial ListView state.
         resetListView();
         (new PersistanceManager(getApplicationContext())).savePlaces(arraylPlaces);
@@ -579,5 +581,15 @@ public class ListPlacesActivity extends AppCompatActivity implements DialogInter
         // Then, we update our location object:
         this.location = location;
         Log.i("MYLOG", "Location updated! (" + location.toString()+")");
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals("NearestPlaceNotification")) {
+            if (!sharedPreferences.getBoolean(key, false)) {
+                Log.i("MYLOG", "Now, the notification every minute should be turned off " + sharedPreferences.getBoolean(key,false));
+                if (serviceIntent != null) {stopService(serviceIntent); serviceIntent = null;}
+            };
+        }
     }
 }
