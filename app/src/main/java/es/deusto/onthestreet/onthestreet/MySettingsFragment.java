@@ -27,11 +27,7 @@ public class MySettingsFragment extends PreferenceFragment implements SharedPref
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 //        if (key.equals("Theme")) {
-        Log.i("MYLOG", "(Theme) Has seleccionado: " + sharedPreferences.getString(key,""));
-//        if (sharedPreferences.getString(key,"").equals("AppTheme2")) {
-//            theme_color = "AppTheme2";
-//        } else {
-//            theme_color = "AppTheme";
+//       sharedPreferences.getString(key,"").equals("AppTheme2")
 //        }
     }
 }

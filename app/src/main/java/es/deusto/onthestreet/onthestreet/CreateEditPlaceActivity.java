@@ -5,12 +5,14 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -80,6 +82,11 @@ public class CreateEditPlaceActivity extends AppCompatActivity implements Google
             updateLongitudeLatitude(placeToEdit.getLongitude(), placeToEdit.getLatitude());
             arraylContacts = placeToEdit.getlContacts();
             // TODO: retrieve also the picture and show it
+        } else {
+            // Depending on an Settings option, the coordinates fields will either be filled automatically or not.
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+            Boolean settingsPreference_automaticFill = sharedPref.getBoolean("AutomaticFillUp", false);
+            checkLocationPermission();
         }
         arrayadapContacts = new ArrayAdapter<Contact>(this, android.R.layout.simple_list_item_2, android.R.id.text1, arraylContacts) {
             @Override
@@ -170,7 +177,6 @@ public class CreateEditPlaceActivity extends AppCompatActivity implements Google
                     Log.i("Contact was picked up:", data.getDataString());
                     arraylContacts.add(new Contact(cursor.getString(0), cursor.getString(1)));
                     arrayadapContacts.notifyDataSetChanged();
-                    return;
                 }
             }
         }

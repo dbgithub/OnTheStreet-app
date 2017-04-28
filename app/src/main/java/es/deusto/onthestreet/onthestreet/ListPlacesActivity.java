@@ -45,6 +45,7 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 public class ListPlacesActivity extends AppCompatActivity implements DialogInterface.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -59,9 +60,9 @@ public class ListPlacesActivity extends AppCompatActivity implements DialogInter
     private int edited_place_index;
     private ActionMode mActionMode = null; // Action mode for CAB (Contextual Action Bar)
     private GoogleApiClient myGoogleApiClient; // For accessing Google Play Services
-    private Location location = null; // For storing current location
+    public Location location = null; // For storing current location
     private int sortType = -1;
-    public static int sortingDistance = 50000; // 50000m = 50KM. Within 50KM around (a la redonda). Sorting distance to sort out the Places list.
+    public static int sortingDistance; // Sorting distance to sort out the Places list.
     private Intent serviceIntent = null; // An Intent that works as a Service. If NULL, then it means that the service has not started, if not NULL, then the service is active.
 
     @Override
@@ -72,14 +73,14 @@ public class ListPlacesActivity extends AppCompatActivity implements DialogInter
         setSupportActionBar(toolbar);
         PreferenceManager.setDefaultValues(this, R.xml.settings_preferences, false); // Loads DEFAULT values for any item in Settings/Preferences page.
         PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext()).registerOnSharedPreferenceChangeListener(this); // Binds a callback listener for changes in preferences/settings page:
-
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        sortingDistance = Integer.valueOf(sharedPref.getString("coverDistance", "50000")); // 50000m = 50KM. Within 50KM around (a la redonda). Sorting distance to sort out the Places list.
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Ejemplo de un snackbar como mensaje emergente:
-                // Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                        // Ejemplo de un snackbar como mensaje emergente: Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 Intent createPlacelIntent = new Intent(getBaseContext(), CreateEditPlaceActivity.class);
                 resetListView();
                 startActivityForResult(createPlacelIntent, CREATE_PLACE);
@@ -396,12 +397,13 @@ public class ListPlacesActivity extends AppCompatActivity implements DialogInter
         // Persistent way of loading data:
         arraylPlaces = new PersistanceManager(getApplicationContext()).loadPlaces();
         arraylPlaces_backup = new PersistanceManager(getApplicationContext()).loadPlaces();
-        if (arraylPlaces.isEmpty()) {
-            arraylPlaces = new ArrayList<>(); // if empty, then initialize to empty ArrayList
-        } else { // If not empty, then, we should start the NearestPlace service to watch the nearest place:
-            startNearestPlaceService();
-        }
-        if (arraylPlaces_backup.isEmpty()) {arraylPlaces_backup = new ArrayList<>();} // if empty, then initialize to empty ArrayList
+        if (arraylPlaces != null) {
+            if (!arraylPlaces.isEmpty()) {
+                // If not empty, then, we should start the NearestPlace service to watch the nearest place:
+                startNearestPlaceService();
+            }
+        } else {arraylPlaces = new ArrayList<>();}
+        if (arraylPlaces_backup == null) {arraylPlaces_backup = new ArrayList<>();} // if empty, then initialize to empty ArrayList
     }
 
     /**
@@ -589,7 +591,10 @@ public class ListPlacesActivity extends AppCompatActivity implements DialogInter
             if (!sharedPreferences.getBoolean(key, false)) {
                 Log.i("MYLOG", "Now, the notification every minute should be turned off " + sharedPreferences.getBoolean(key,false));
                 if (serviceIntent != null) {stopService(serviceIntent); serviceIntent = null;}
-            };
+            }
+        } else if (key.equals("coverDistance")) {
+            sortingDistance = Integer.valueOf(sharedPreferences.getString(key, "50000")); // 50000m = 50KM. Within 50KM around (a la redonda). Sorting distance to sort out the Places list.
         }
+
     }
 }
