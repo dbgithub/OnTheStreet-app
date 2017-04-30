@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -45,21 +44,20 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 public class ListPlacesActivity extends AppCompatActivity implements DialogInterface.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     // Declaring a ArrayList of Place entity:
     public ArrayList<Place> arraylPlaces = new ArrayList<>();
-    public ArrayList<Place> arraylPlaces_backup = new ArrayList<>(); // This list will be used to restore the previous items after a search (like a backup)
+    public static ArrayList<Place> arraylPlaces_backup = new ArrayList<>(); // This list will be used to restore the previous items after a search (like a backup)
     private ArrayAdapter<Place> arrayadapPlaces;
     public static final int CREATE_PLACE = 0; // ID for CreatePlace Intent
     public static final int PLACE_DETAILS = 1; // ID for PlaceDetails Intent
     private static final int MY_PERMISSIONS_FINE_LOCATION = 3; // 3 doesn't mean anything, it's just an ID.
     private int edited_place_index;
     private ActionMode mActionMode = null; // Action mode for CAB (Contextual Action Bar)
-    private GoogleApiClient myGoogleApiClient; // For accessing Google Play Services
+    public static GoogleApiClient myGoogleApiClient; // For accessing Google Play Services
     public Location location = null; // For storing current location
     private int sortType = -1;
     public static int sortingDistance; // Sorting distance to sort out the Places list.
@@ -82,7 +80,6 @@ public class ListPlacesActivity extends AppCompatActivity implements DialogInter
             public void onClick(View view) {
                         // Ejemplo de un snackbar como mensaje emergente: Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 Intent createPlacelIntent = new Intent(getBaseContext(), CreateEditPlaceActivity.class);
-                resetListView();
                 startActivityForResult(createPlacelIntent, CREATE_PLACE);
             }
         });
@@ -302,6 +299,23 @@ public class ListPlacesActivity extends AppCompatActivity implements DialogInter
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_FINE_LOCATION:
+                if (grantResults[0] == -1) {
+                    // If the user did not grant the permission, then, booo..., back luck for you!
+                } else {
+                    // The user granted the permission! :)
+                    // So, we continue as planned...
+                    acquiredLocation();
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -411,9 +425,8 @@ public class ListPlacesActivity extends AppCompatActivity implements DialogInter
      */
     private void startNearestPlaceService() {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-            Boolean Pref_nearestPlaceSwitch = sharedPref.getBoolean("NearestPlaceNotification", false);
-            Log.i("MYLOG", "The switch of 'NearestPlace' preference setting is: " + Pref_nearestPlaceSwitch);
-            if (Pref_nearestPlaceSwitch && serviceIntent==null) {
+            Boolean settingsPreference_nearestPlaceSwitch = sharedPref.getBoolean("NearestPlaceNotification", false);
+            if (settingsPreference_nearestPlaceSwitch && serviceIntent==null) {
                 serviceIntent = new Intent(this, NearestPlaceService.class);
                 startService(serviceIntent);
             }
@@ -474,10 +487,10 @@ public class ListPlacesActivity extends AppCompatActivity implements DialogInter
                 Location tmp_lo = new Location("");
                 tmp_lo.setLongitude(p.getLongitude());
                 tmp_lo.setLatitude(p.getLatitude());
-                if (location.distanceTo(tmp_lo) <= sortingDistance) {
-                    Log.i("MYLOG","Esta dentro de un radio de "+sortingDistance/1000+"KM a la redonda (distancia: "+location.distanceTo(tmp_lo)+")");
+                if (location.distanceTo(tmp_lo) <= sortingDistance*1000) {
+                    Log.i("MYLOG","Esta dentro de un radio de "+sortingDistance+"KM a la redonda (distancia: "+location.distanceTo(tmp_lo)+")");
                     arraylPlaces.add(p);
-                } else {Log.i("MYLOG","Esta fuera de un radio de "+sortingDistance/1000+"KM a la redonda");}
+                } else {Log.i("MYLOG","Esta fuera de un radio de "+sortingDistance+"KM a la redonda");}
             }
         }
         arrayadapPlaces.notifyDataSetChanged();

@@ -67,6 +67,7 @@ public class CreateEditPlaceActivity extends AppCompatActivity implements Google
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_place);
+        myGoogleApiClient = ListPlacesActivity.myGoogleApiClient;
 
         // Now we should check whether ths activity was called because the user wanted to CREATE a new Place or EDIT it.
         // The reason behind this is that to edit the place, "CreatePaceActivity" activity is also used for the same purpose.
@@ -86,7 +87,7 @@ public class CreateEditPlaceActivity extends AppCompatActivity implements Google
             // Depending on an Settings option, the coordinates fields will either be filled automatically or not.
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             Boolean settingsPreference_automaticFill = sharedPref.getBoolean("AutomaticFillUp", false);
-            checkLocationPermission();
+            if (settingsPreference_automaticFill) {checkLocationPermission();}
         }
         arrayadapContacts = new ArrayAdapter<Contact>(this, android.R.layout.simple_list_item_2, android.R.id.text1, arraylContacts) {
             @Override
@@ -186,7 +187,7 @@ public class CreateEditPlaceActivity extends AppCompatActivity implements Google
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_CAMERA:
-                if (grantResults.length == 0) {
+                if (grantResults[0] == -1) {
                     // If the user did not grant the permission, then, booo..., back luck for you!
                 } else {
                     // The user granted the permission! :)
@@ -203,7 +204,7 @@ public class CreateEditPlaceActivity extends AppCompatActivity implements Google
                 }
                 break;
             case MY_PERMISSIONS_EXTERNAL_STORAGE:
-                if (grantResults.length == 0) {
+                if (grantResults[0] == -1) {
                     // If the user did not grant the permission, then, booo..., back luck for you!
                 } else {
                     // The user granted the permission! :)
@@ -212,7 +213,7 @@ public class CreateEditPlaceActivity extends AppCompatActivity implements Google
                 }
                 break;
             case MY_PERMISSIONS_FINE_LOCATION:
-                if (grantResults.length == 0) {
+                if (grantResults[0] == -1) {
                     // If the user did not grant the permission, then, booo..., back luck for you!
                 } else {
                     // The user granted the permission! :)

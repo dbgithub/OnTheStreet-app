@@ -6,19 +6,15 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Handler;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-
-import com.google.android.gms.location.LocationListener;
+import android.location.LocationListener;
 
 import java.util.ArrayList;
 
@@ -30,7 +26,7 @@ public class NearestPlaceService extends Service implements LocationListener {
 
     private LocationManager lm;
     private ArrayList<Place> arraylPlaces;
-    private long waiting_interval = 60; // in seconds!!
+    private long waiting_interval = 5; // in seconds!!
     private float minDistance = 20f; // Minimum distance between location updates, in meters
     private double nearestPlaceLongitude = 0;
     private double nearestPlaceLatitude = 0;
@@ -40,7 +36,7 @@ public class NearestPlaceService extends Service implements LocationListener {
     @Override
     public IBinder onBind(Intent intent) { return null;}
 
-    @SuppressWarnings("MissingPermission") // TODO: Maybe I should implement a proper way of checking permission (in the future)
+    @SuppressWarnings("MissingPermission")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) { // No need to access intent for the moment.
         // Display a notification or so...
@@ -49,15 +45,14 @@ public class NearestPlaceService extends Service implements LocationListener {
         // Activate location gathering to check for the nearest place:
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         // Every minute the app will check whether the nearest place/location has changed, looking among the nearest places and choosing the nearest one for comparison.
-        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER,waiting_interval*1000,minDistance, (android.location.LocationListener) this); // elapsed time should be specified in milliseconds
-
+        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER,waiting_interval*1000,minDistance, this); // elapsed time should be specified in milliseconds; distance in meters
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
         Log.i("MYLOG", "NearestPlace SERVICE HAS STOPPED!");
-        lm.removeUpdates((android.location.LocationListener)this);
+        lm.removeUpdates(this);
         super.onDestroy();
     }
 
@@ -75,6 +70,7 @@ public class NearestPlaceService extends Service implements LocationListener {
                 Location tmp_lo = new Location("");
                 tmp_lo.setLongitude(p.getLongitude());
                 tmp_lo.setLatitude(p.getLatitude());
+                Log.i("MYLOG", "distanceTo: " + location.distanceTo(tmp_lo));
                 if (location.distanceTo(tmp_lo) <= shortestDistance) {
                     nearestPlace = new Place(p.getName(),p.getNeighborhood(),p.getDescription(),p.getlContacts(),p.getLongitude(),p.getLatitude());
                     distanceToPlace = location.distanceTo(tmp_lo);
@@ -104,7 +100,7 @@ public class NearestPlaceService extends Service implements LocationListener {
                             new NotificationCompat.Builder(getApplicationContext())
                                     .setSmallIcon(R.drawable.ic_location_drop_on_black_24dp)
                                     .setContentTitle("You are next to one of your favourite places!")
-                                    .setContentText(tmpPl.getName() + " is approx. " + distanceToPlace + "m from you! Would you fancy visiting? :)");
+                                    .setContentText(tmpPl.getName() + " is approx. " + Math.round(distanceToPlace) + "m from you! Would you fancy visiting? :)");
                     Notification notif = nBuilder.build();
 
                     // Displaying the notification:
@@ -117,6 +113,19 @@ public class NearestPlaceService extends Service implements LocationListener {
                 nearestPlaceLatitude = tmpPl.getLatitude();
             }
         }
+    }
+
+    // THE FOLLOWING METHODS HAD TO BE IMPLEMENTED BECAUSE OF THE IMPLEMENTATION OF THE INTERFACE:
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
     }
 
     /**
