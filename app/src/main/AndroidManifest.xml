@@ -21,17 +21,10 @@
         android:required="false" />
 
     <uses-permission android:name="android.permission.CAMERA" /> <!-- This is a DANGEROUS permission -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- The write permission implicitly allows reading permission -->
-    <!-- This is a DANGEROUS permission -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- The write permission implicitly allows reading permission --> <!-- This is a DANGEROUS permission -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />  <!-- This is a DANGEROUS permission -->
 
-    <!-- This is a DANGEROUS permission -->
-    <!--
- just in case:
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -47,7 +40,6 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <!-- This activity will receive SEARCH intents (instead of delegating the search to another activity) -->
@@ -72,7 +64,7 @@
             android:label="@string/title_activity_place_details"
             android:theme="@style/AppTheme.NoActionBar" />
 
-        <!-- For apps targeting API 24 or higher, FileProdiver is the proper way to retrieve the URI of a picture when taking a picture. -->
+        <!-- For apps targeting API 24 or higher, FileProvider is the proper way to retrieve the URI of a picture when taking a picture. -->
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="es.deusto.onthestreet.onthestreet.fileprovider"

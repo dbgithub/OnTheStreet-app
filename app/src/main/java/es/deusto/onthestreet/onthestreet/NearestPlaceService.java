@@ -28,8 +28,8 @@ public class NearestPlaceService extends Service implements LocationListener {
     private ArrayList<Place> arraylPlaces;
     private long waiting_interval = 5; // in seconds!!
     private float minDistance = 20f; // Minimum distance between location updates, in meters
-    private double nearestPlaceLongitude = 0;
-    private double nearestPlaceLatitude = 0;
+    public static double nearestPlaceLongitude = 0;
+    public static double  nearestPlaceLatitude = 0;
     private double distanceToPlace = 0;
 
     @Nullable
